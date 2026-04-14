@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ReviewGuard AI — Fake Product Review Detection System
 
 > An end-to-end AI-powered system to detect fake product reviews using NLP, Machine Learning, and a professional full-stack web application.
@@ -269,3 +270,6 @@ My son uses this for school. Works fine for light tasks. Gets a bit warm with he
 ---
 
 *Built as a portfolio project demonstrating full-stack development + NLP/ML integration.*
+=======
+# fake-review-detector
+>>>>>>> 86b9fba72ef32b04c1149bd6a577ff4f7ab73d4e
