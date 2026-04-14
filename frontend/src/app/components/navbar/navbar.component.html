@@ -1,0 +1,27 @@
+<nav class="navbar">
+  <div class="nav-brand">
+    <span class="brand-icon">🔍</span>
+    <span class="brand-name">ReviewGuard <span class="brand-tag">AI</span></span>
+  </div>
+
+  <div class="nav-links" [class.open]="menuOpen">
+    <a routerLink="/upload" routerLinkActive="active" (click)="menuOpen=false">
+      <span class="nav-icon">📤</span> Upload
+    </a>
+    <a routerLink="/results" routerLinkActive="active" (click)="menuOpen=false">
+      <span class="nav-icon">📊</span> Results
+    </a>
+    <a routerLink="/admin" routerLinkActive="active" (click)="menuOpen=false">
+      <span class="nav-icon">🛡️</span> Admin
+    </a>
+  </div>
+
+  <div class="nav-status">
+    <span class="status-dot"></span>
+    <span class="status-text">AI Active</span>
+  </div>
+
+  <button class="hamburger" (click)="menuOpen = !menuOpen">
+    <span></span><span></span><span></span>
+  </button>
+</nav>

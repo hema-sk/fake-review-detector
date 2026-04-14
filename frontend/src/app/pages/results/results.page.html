@@ -1,0 +1,167 @@
+<div class="results-page" *ngIf="results">
+
+  <!-- Top Bar -->
+  <div class="results-topbar">
+    <button class="back-btn" (click)="goBack()">← New Analysis</button>
+    <div class="topbar-meta">
+      <span class="meta-chip">{{ results.total }} Reviews Analyzed</span>
+      <span class="meta-chip accent">Avg Confidence: {{ (results.avg_confidence * 100).toFixed(1) }}%</span>
+    </div>
+  </div>
+
+  <!-- Summary Dashboard -->
+  <div class="summary-grid">
+
+    <!-- Donut Chart -->
+    <div class="summary-card donut-card">
+      <h3 class="card-title">Classification Overview</h3>
+      <div class="donut-wrapper">
+        <div class="donut" [style.background]="donutStyle">
+          <div class="donut-hole">
+            <span class="donut-main">{{ results.fake_percentage }}%</span>
+            <span class="donut-label">Fake</span>
+          </div>
+        </div>
+        <div class="donut-legend">
+          <div class="legend-item">
+            <span class="legend-dot fake"></span>
+            <div>
+              <span class="legend-count">{{ results.fake_count }}</span>
+              <span class="legend-name">Fake Reviews</span>
+            </div>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot genuine"></span>
+            <div>
+              <span class="legend-count">{{ results.genuine_count }}</span>
+              <span class="legend-name">Genuine Reviews</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stat-cards">
+      <div class="stat-card red">
+        <div class="stat-top">
+          <span class="stat-icon">🚨</span>
+          <span class="stat-badge fake">FAKE</span>
+        </div>
+        <div class="stat-value">{{ results.fake_count }}</div>
+        <div class="stat-label">Fake Reviews Detected</div>
+        <div class="stat-bar">
+          <div class="stat-fill red" [style.width.%]="results.fake_percentage"></div>
+        </div>
+        <div class="stat-pct">{{ results.fake_percentage }}%</div>
+      </div>
+
+      <div class="stat-card green">
+        <div class="stat-top">
+          <span class="stat-icon">✅</span>
+          <span class="stat-badge genuine">GENUINE</span>
+        </div>
+        <div class="stat-value">{{ results.genuine_count }}</div>
+        <div class="stat-label">Genuine Reviews Verified</div>
+        <div class="stat-bar">
+          <div class="stat-fill green" [style.width.%]="results.genuine_percentage"></div>
+        </div>
+        <div class="stat-pct">{{ results.genuine_percentage }}%</div>
+      </div>
+
+      <div class="stat-card blue">
+        <div class="stat-top">
+          <span class="stat-icon">🎯</span>
+          <span class="stat-badge confidence">AI Confidence</span>
+        </div>
+        <div class="stat-value">{{ (results.avg_confidence * 100).toFixed(1) }}<span class="stat-unit">%</span></div>
+        <div class="stat-label">Average Model Confidence</div>
+        <div class="stat-bar">
+          <div class="stat-fill blue" [style.width.%]="results.avg_confidence * 100"></div>
+        </div>
+        <div class="stat-pct">{{ confidenceLabel(results.avg_confidence) }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter & Sort Bar -->
+  <div class="list-controls">
+    <div class="filter-tabs">
+      <button [class.active]="filter === 'ALL'" (click)="filter = 'ALL'">All ({{ results.total }})</button>
+      <button [class.active]="filter === 'FAKE'" (click)="filter = 'FAKE'" class="fake-tab">
+        🚨 Fake ({{ results.fake_count }})
+      </button>
+      <button [class.active]="filter === 'GENUINE'" (click)="filter = 'GENUINE'" class="genuine-tab">
+        ✅ Genuine ({{ results.genuine_count }})
+      </button>
+    </div>
+    <select [(ngModel)]="sortBy" class="sort-select">
+      <option value="confidence">Sort: Confidence</option>
+      <option value="classification">Sort: Classification</option>
+    </select>
+  </div>
+
+  <!-- Review Cards List -->
+  <div class="review-list">
+    <div
+      class="review-item"
+      *ngFor="let r of filteredResults; let i = index"
+      [class.fake]="r.classification === 'FAKE'"
+      [class.genuine]="r.classification === 'GENUINE'"
+    >
+      <div class="review-header">
+        <div class="review-id">#{{ r.id || (i + 1) }}</div>
+        <div class="review-badge" [class.fake]="r.classification === 'FAKE'" [class.genuine]="r.classification === 'GENUINE'">
+          {{ r.classification === 'FAKE' ? '🚨 FAKE' : '✅ GENUINE' }}
+        </div>
+        <div class="confidence-pill">
+          <span class="conf-bar">
+            <span class="conf-fill" [style.width.%]="r.confidence * 100" [class.fake]="r.classification === 'FAKE'" [class.genuine]="r.classification === 'GENUINE'"></span>
+          </span>
+          {{ (r.confidence * 100).toFixed(1) }}%
+        </div>
+      </div>
+
+      <div class="review-text">{{ r.review || r.text }}</div>
+
+      <!-- Feature Metrics -->
+      <div class="review-metrics">
+        <div class="metric">
+          <span class="metric-label">Fake Signals</span>
+          <span class="metric-value" [class.red]="r.features.fake_pattern_hits > 1">{{ r.features.fake_pattern_hits }}</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Real Signals</span>
+          <span class="metric-value" [class.green]="r.features.genuine_pattern_hits > 0">{{ r.features.genuine_pattern_hits }}</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Word Count</span>
+          <span class="metric-value">{{ r.features.review_length }}</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Caps Ratio</span>
+          <span class="metric-value" [class.red]="r.features.caps_ratio > 0.2">{{ (r.features.caps_ratio * 100).toFixed(0) }}%</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">! Count</span>
+          <span class="metric-value" [class.red]="r.features.exclamation_count > 2">{{ r.features.exclamation_count }}</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Vocab Diversity</span>
+          <span class="metric-value">{{ (r.features.unique_word_ratio * 100).toFixed(0) }}%</span>
+        </div>
+      </div>
+
+      <!-- Probability Bar -->
+      <div class="prob-bar-row">
+        <span class="prob-label fake">Fake {{ (r.fake_probability * 100).toFixed(0) }}%</span>
+        <div class="prob-bar">
+          <div class="prob-fake" [style.width.%]="r.fake_probability * 100"></div>
+          <div class="prob-genuine" [style.width.%]="r.genuine_probability * 100"></div>
+        </div>
+        <span class="prob-label genuine">Genuine {{ (r.genuine_probability * 100).toFixed(0) }}%</span>
+      </div>
+    </div>
+  </div>
+
+</div>

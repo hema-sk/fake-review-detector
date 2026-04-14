@@ -1,0 +1,106 @@
+<div class="upload-page">
+  <!-- Hero Header -->
+  <div class="page-header">
+    <div class="header-badge">
+      <span class="badge-dot"></span>
+      NLP-Powered Detection
+    </div>
+    <h1>Detect Fake Reviews <span class="highlight">Instantly</span></h1>
+    <p class="subtitle">Paste reviews or upload a CSV — our AI analyzes linguistic patterns, sentiment anomalies, and behavioral signals to classify authenticity.</p>
+  </div>
+
+  <!-- Mode Toggle -->
+  <div class="mode-toggle">
+    <button [class.active]="mode === 'paste'" (click)="mode = 'paste'">
+      <span>✏️</span> Paste Reviews
+    </button>
+    <button [class.active]="mode === 'csv'" (click)="mode = 'csv'">
+      <span>📁</span> Upload CSV
+    </button>
+  </div>
+
+  <!-- Paste Mode -->
+  <div class="input-card" *ngIf="mode === 'paste'">
+    <div class="card-header">
+      <h3>Enter Reviews</h3>
+      <span class="hint">One review per line • up to 100 reviews</span>
+    </div>
+    <textarea
+      [(ngModel)]="pastedText"
+      placeholder="Paste your reviews here, one per line...&#10;&#10;Example:&#10;This is the best product I've ever bought! Amazing!!!&#10;Works okay, had some issues with the battery after 2 weeks."
+      rows="12"
+    ></textarea>
+    <div class="input-footer">
+      <span class="count" *ngIf="reviewLines.length > 0">
+        {{ reviewLines.length }} review{{ reviewLines.length !== 1 ? 's' : '' }} detected
+      </span>
+      <span class="count empty" *ngIf="reviewLines.length === 0">Start typing to detect reviews</span>
+    </div>
+  </div>
+
+  <!-- CSV Mode -->
+  <div class="input-card csv-mode" *ngIf="mode === 'csv'">
+    <div
+      class="drop-zone"
+      [class.active]="dragOver"
+      [class.has-file]="selectedFile"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event)"
+    >
+      <div class="drop-content" *ngIf="!selectedFile">
+        <div class="drop-icon">📂</div>
+        <h3>Drop your CSV file here</h3>
+        <p>or <label class="file-link">browse files <input type="file" accept=".csv" (change)="onFileSelect($event)" hidden></label></p>
+        <span class="drop-hint">Max 200 rows • Column must be named <code>review</code> or <code>text</code></span>
+      </div>
+      <div class="file-selected" *ngIf="selectedFile">
+        <div class="file-icon">✅</div>
+        <div class="file-info">
+          <strong>{{ selectedFile.name }}</strong>
+          <span>{{ (selectedFile.size / 1024).toFixed(1) }} KB</span>
+        </div>
+        <button class="remove-file" (click)="selectedFile = null">✕</button>
+      </div>
+    </div>
+
+    <div class="csv-template">
+      <span class="template-label">📋 CSV Format Example:</span>
+      <code>review<br>"This product is amazing..."<br>"Had issues with the item after..."</code>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-alert" *ngIf="error">
+    <span>⚠️</span> {{ error }}
+  </div>
+
+  <!-- Analyze Button -->
+  <button class="analyze-btn" (click)="analyze()" [disabled]="isLoading">
+    <span *ngIf="!isLoading">
+      <span class="btn-icon">🔍</span> Analyze Reviews
+    </span>
+    <span *ngIf="isLoading" class="loading-state">
+      <span class="spinner"></span> Analyzing with AI...
+    </span>
+  </button>
+
+  <!-- Info Cards -->
+  <div class="info-grid">
+    <div class="info-card">
+      <div class="info-icon">🧠</div>
+      <h4>NLP Processing</h4>
+      <p>TF-IDF vectorization with bigram analysis extracts linguistic patterns invisible to humans.</p>
+    </div>
+    <div class="info-card">
+      <div class="info-icon">📊</div>
+      <h4>Naive Bayes + Heuristics</h4>
+      <p>Statistical classification combined with behavioral pattern matching for high accuracy.</p>
+    </div>
+    <div class="info-card">
+      <div class="info-icon">⚡</div>
+      <h4>Real-time Results</h4>
+      <p>Batch analysis of 100+ reviews in seconds with per-review confidence scores.</p>
+    </div>
+  </div>
+</div>
